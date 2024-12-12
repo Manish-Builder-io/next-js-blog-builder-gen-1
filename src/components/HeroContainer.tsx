@@ -9,10 +9,9 @@ type HeroContainerProps = {
 // HeroContainer component
 const HeroContainer: React.FC<HeroContainerProps> = ({ backgroundImage, children }) => {
 
-console.log("🚀 ~ children:", children);
+console.log("🚀 ~ backgroundImage:", backgroundImage);
 
 
-  console.log("🚀 ~ backgroundImage:", backgroundImage);
 
   return (
     <div
