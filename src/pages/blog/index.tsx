@@ -11,6 +11,8 @@ import AuthorBlock from "@/components/AuthorBlock";
 
 builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY!);
 
+builder.setUserAttributes({users: 'admin'});
+
 // Define types for the article data structure
 type Author = {
   value: {
@@ -110,7 +112,7 @@ export const getStaticProps = async () => {
     includeRefs: true,
     enrich: true,
     query: {
-            'data.slug': {$eq: 'fashion-2025'},
+      "data.slug": { $ne: "fashion-2025" },
     },
   });
 

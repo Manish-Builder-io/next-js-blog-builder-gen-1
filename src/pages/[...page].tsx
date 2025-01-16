@@ -1,52 +1,115 @@
+// import React from "react";
+// import { useRouter } from "next/router";
+// import { BuilderComponent, builder, useIsPreviewing } from "@builder.io/react";
+// import { setPixelProperties } from '@builder.io/utils';
+
+// import DefaultErrorPage from "next/error";
+// import Head from "next/head";
+// import { BuilderContent } from "@builder.io/sdk";
+// import "../builder-registry";
+
+// builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY!);
+
+// const accordionData = [
+//   {
+//     title: "Accordion Item 1",
+//     body: "This is the content for the first accordion item. It can contain text, images, or any HTML content."
+//   },
+//   {
+//     title: "Accordion Item 2",
+//     body: "This is the content for the second accordion item. You can also add more detailed information or sections here."
+//   },
+//   {
+//     title: "Accordion Item 3",
+//     body: "This is the content for the third accordion item. It's the final section, and you can close or collapse it."
+//   }
+// ];
+
+// export async function getServerSideProps({ params }) {
+//   const mode = 'page'; // Define your model name here
+//   const page = await builder
+//       .get(mode, { userAttributes: { urlPath: "/" + ((params?.page as string[])?.join("/") || "") } }) // Define your query parameters properly
+//       .toPromise() || null;
+
+//   setPixelProperties(page, { alt: 'pixel tag from builder' });
+
+//   return {
+//     props: {
+//       page,
+//     },
+//   }
+// }
+
+// // Define the Page component
+// export default function Page({ page }: { page: BuilderContent | null }) {
+//   const router = useRouter();
+//   const isPreviewing = useIsPreviewing();
+
+//   // If the page content is not available
+//   // and not in preview mode, show a 404 error page
+//   if (!page && !isPreviewing) {
+//     return <DefaultErrorPage statusCode={404} />;
+//   }
+
+//   // If the page content is available, render
+//   // the BuilderComponent with the page content
+//   return (
+//     <>
+//       <Head>
+//         <title>{page?.data?.title}</title>
+//       </Head>
+//       {/* Render the Builder page */}
+//       <BuilderComponent model="page" content={page || undefined} data={{ accordionData }} />
+//     </>
+//   );
+// }
+
 import React from "react";
 import { useRouter } from "next/router";
 import { BuilderComponent, builder, useIsPreviewing } from "@builder.io/react";
+import { setPixelProperties } from "@builder.io/utils";
+
 import DefaultErrorPage from "next/error";
 import Head from "next/head";
 import { BuilderContent } from "@builder.io/sdk";
-import { GetStaticProps } from "next";
 import "../builder-registry";
 
 builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY!);
 
-// Define a function that fetches the Builder
-// content for a given page
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  // Fetch the builder content for the given page
-  const page = await builder
-    .get("page", {
-      userAttributes: {
-        urlPath: "/" + ((params?.page as string[])?.join("/") || ""),
-      },
-    })
-    .toPromise();
+builder.setUserAttributes({users: 'admin'});
 
-  // Return the page content as props
+const accordionData = [
+  {
+    title: "Accordion Item 1",
+    body: "This is the content for the first accordion item. It can contain text, images, or any HTML content.",
+  },
+  {
+    title: "Accordion Item 2",
+    body: "This is the content for the second accordion item. You can also add more detailed information or sections here.",
+  },
+  {
+    title: "Accordion Item 3",
+    body: "This is the content for the third accordion item. It's the final section, and you can close or collapse it.",
+  },
+];
+
+export async function getServerSideProps({ params }) {
+  const mode = "page"; // Define your model name here
+  const page =
+    (await builder
+      .get(mode, {
+        userAttributes: {
+          urlPath: "/" + ((params?.page as string[])?.join("/") || ""),
+        },
+      }) // Define your query parameters properly
+      .toPromise()) || null;
+
+  setPixelProperties(page, { alt: "pixel tag from builder" });
+
   return {
     props: {
-      page: page || null,
+      page,
     },
-    // Revalidate the content every 5 seconds
-    revalidate: 5,
-  };
-};
-
-// Define a function that generates the
-// static paths for all pages in Builder
-export async function getStaticPaths() {
-  // Get a list of all pages in Builder
-  const pages = await builder.getAll("page", {
-    // We only need the URL field
-    fields: "data.url",
-    options: { noTargeting: true },
-  });
-
-  // Generate the static paths for all pages in Builder
-  return {
-    paths: pages
-      .map((page) => String(page.data?.url))
-      .filter((url) => url !== "/"),
-    fallback: "blocking",
   };
 }
 
@@ -69,7 +132,11 @@ export default function Page({ page }: { page: BuilderContent | null }) {
         <title>{page?.data?.title}</title>
       </Head>
       {/* Render the Builder page */}
-      <BuilderComponent model="page" content={page || undefined} />
+      <BuilderComponent
+        model="page"
+        content={page || undefined}
+        data={{ accordionData }}
+      />
     </>
   );
 }
