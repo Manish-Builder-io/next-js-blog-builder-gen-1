@@ -1,43 +1,55 @@
+// // pages/[...page].tsx
 // import React from "react";
 // import { useRouter } from "next/router";
 // import { BuilderComponent, builder, useIsPreviewing } from "@builder.io/react";
-// import { setPixelProperties } from '@builder.io/utils';
-
+// import { BuilderContent } from "@builder.io/sdk";
 // import DefaultErrorPage from "next/error";
 // import Head from "next/head";
-// import { BuilderContent } from "@builder.io/sdk";
-// import "../builder-registry";
+// import { GetStaticProps } from "next";
+// import "@builder.io/widgets";
+// // Replace with your Public API Key
 
 // builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY!);
 
-// const accordionData = [
-//   {
-//     title: "Accordion Item 1",
-//     body: "This is the content for the first accordion item. It can contain text, images, or any HTML content."
-//   },
-//   {
-//     title: "Accordion Item 2",
-//     body: "This is the content for the second accordion item. You can also add more detailed information or sections here."
-//   },
-//   {
-//     title: "Accordion Item 3",
-//     body: "This is the content for the third accordion item. It's the final section, and you can close or collapse it."
-//   }
-// ];
-
-// export async function getServerSideProps({ params }) {
-//   const mode = 'page'; // Define your model name here
+// // Define a function that fetches the Builder
+// // content for a given page
+// export const getStaticProps: GetStaticProps = async ({ params }) => {
+//   // Fetch the builder content for the given page
 //   const page = await builder
-//       .get(mode, { userAttributes: { urlPath: "/" + ((params?.page as string[])?.join("/") || "") } }) // Define your query parameters properly
-//       .toPromise() || null;
+//     .get("page", {
+//       userAttributes: {
+//         urlPath: "/" + ((params?.page as string[])?.join("/") || ""),
+//       },
+//     })
+//     .toPromise();
 
-//   setPixelProperties(page, { alt: 'pixel tag from builder' });
-
+//   // Return the page content as props
 //   return {
 //     props: {
-//       page,
+//       page: page || null,
 //     },
-//   }
+//     // Revalidate the content every 5 seconds
+//     revalidate: 5,
+//   };
+// };
+
+// // Define a function that generates the
+// // static paths for all pages in Builder
+// export async function getStaticPaths() {
+//   // Get a list of all pages in Builder
+//   const pages = await builder.getAll("page", {
+//     // We only need the URL field
+//     fields: "data.url",
+//     options: { noTargeting: true },
+//   });
+
+//   // Generate the static paths for all pages in Builder
+//   return {
+//     paths: pages
+//       .map((page) => `${page.data?.url}`)
+//       .filter((url) => url !== "/"),
+//     fallback: "blocking",
+//   };
 // }
 
 // // Define the Page component
@@ -59,7 +71,15 @@
 //         <title>{page?.data?.title}</title>
 //       </Head>
 //       {/* Render the Builder page */}
-//       <BuilderComponent model="page" content={page || undefined} data={{ accordionData }} />
+//       <BuilderComponent
+//         model="page"
+//         content={page || undefined}
+//         options={{ enrich: true }}
+//         context={{
+//           imgUrl:
+//             "https://storage.googleapis.com/kopperfield-prod-public/single_line_diagrams/previews/1728683484880-Blank_Template_Screenshot.png",
+//         }}
+//       />
 //     </>
 //   );
 // }
@@ -76,22 +96,7 @@ import "../builder-registry";
 
 builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY!);
 
-builder.setUserAttributes({users: 'admin'});
-
-const accordionData = [
-  {
-    title: "Accordion Item 1",
-    body: "This is the content for the first accordion item. It can contain text, images, or any HTML content.",
-  },
-  {
-    title: "Accordion Item 2",
-    body: "This is the content for the second accordion item. You can also add more detailed information or sections here.",
-  },
-  {
-    title: "Accordion Item 3",
-    body: "This is the content for the third accordion item. It's the final section, and you can close or collapse it.",
-  },
-];
+builder.setUserAttributes({users: ['admin', 'designers']});
 
 export async function getServerSideProps({ params }) {
   const mode = "page"; // Define your model name here
@@ -134,9 +139,9 @@ export default function Page({ page }: { page: BuilderContent | null }) {
       {/* Render the Builder page */}
       <BuilderComponent
         model="page"
-        content={page || undefined}
-        data={{ accordionData }}
-      />
+        content={page || undefined}      
+        />
     </>
   );
 }
+
