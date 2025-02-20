@@ -96,7 +96,9 @@ import "../builder-registry";
 
 builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY!);
 
-builder.setUserAttributes({users: ['admin', 'designers']});
+const tags = ["Non beauty"];
+
+builder.setUserAttributes({productTags: tags, users: ['admin', 'designers']});
 
 export async function getServerSideProps({ params }) {
   const mode = "page"; // Define your model name here
@@ -104,8 +106,11 @@ export async function getServerSideProps({ params }) {
     (await builder
       .get(mode, {
         userAttributes: {
+          // productTags: ["Badge:New"],
+          // users: ["admin", "developers"],
           urlPath: "/" + ((params?.page as string[])?.join("/") || ""),
         },
+        enrich: true,
       }) // Define your query parameters properly
       .toPromise()) || null;
 
@@ -139,9 +144,10 @@ export default function Page({ page }: { page: BuilderContent | null }) {
       {/* Render the Builder page */}
       <BuilderComponent
         model="page"
-        content={page || undefined}      
-        />
+        content={page || undefined}
+        options={{ enrich: true }}
+        data={{ products: ["A", "B", "C"]}}
+      />
     </>
   );
 }
-
