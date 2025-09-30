@@ -15,6 +15,8 @@ import SimpleHeroWithCta from "./components/SimpleHeroWithCTA";
 
 import CustomTabs from "./components/Tabs";
 
+import BuilderImageWrapper from "./components/BuilderImageWrapper";
+
 builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY!);
 
 Builder.registerComponent(
@@ -29,6 +31,7 @@ Builder.registerComponent(
     ],
   }
 );
+
 
 Builder.registerComponent(CardComponent, {
   name: "CardComponent",

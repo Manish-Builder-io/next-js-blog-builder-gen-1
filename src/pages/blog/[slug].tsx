@@ -44,7 +44,7 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
   const articleData =
 
     (await builder
-      .get("blog-article", {
+      .get("blog-articles", {
         query: {
           "data.slug": params?.slug,
         },
@@ -83,7 +83,7 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
 
 // Define static paths return type
 export async function getStaticPaths() {
-  const articles = await builder.getAll("blog-article", {
+  const articles = await builder.getAll("blog-articles", {
     options: { noTargeting: true,  includeUnpublished: true },
     includeUnpublished: true,
     fields: "data.slug",
@@ -110,20 +110,43 @@ export default function BlogArticle({ articleData }) {
   return (
     <>
       <Header />
-      <h1>{articleData?.data?.title}</h1>
-      <img src={articleData?.data?.image} alt={articleData?.data?.title}/>
+      
+      {/* Hero Section with Image and Overlay Text */}
+      <section className="relative w-full h-[50vh] overflow-hidden">
+        {/* Background Image */}
+        <img 
+          src={articleData?.data?.image} 
+          alt={articleData?.data?.title}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        
+        {/* Dark Overlay for better text readability */}
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        
+        {/* Hero Content */}
+        <div className="relative z-10 flex items-center justify-center h-full">
+          <div className="text-center text-white px-4 max-w-4xl">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
+              {articleData?.data?.title}
+            </h1>
+            {/* Article Content */}
+            <div className="container mx-auto px-4 py-8 text-lg md:text-xl drop-shadow-md">
+              <div dangerouslySetInnerHTML={{ __html: articleData?.data?.content || '' }} />
+            </div>
+          </div>
+        </div>
+      </section>
+
       <BuilderContent
-        model="blog-article"
+        model="blog-articles"
         content={articleData}
         options={{ enrich: true}}
       >
         {(data, loading, fullContent) => (
           //pass the template to the content prop for server-side rendering, but pass the article data to the data prop to access within our template
           <>
-            <div>Hello blog</div>
-            <h1>{data?.title}</h1>
             <BuilderComponent
-              model="blog-article"
+              model="blog-articles"
               content={articleData}
               data={{ article: fullContent }}
               options={{ enrich: true }}

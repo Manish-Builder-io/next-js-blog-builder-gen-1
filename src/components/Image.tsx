@@ -8,6 +8,20 @@ export const BuilderMetaContext = React.createContext({
 
 import { Builder, BuilderBlockComponent } from '@builder.io/react'
 
+// Simple throttle function
+function throttle(func: Function, limit: number) {
+  let inThrottle: boolean = false;
+  return function(this: any) {
+    const args = arguments;
+    const context = this;
+    if (!inThrottle) {
+      func.apply(context, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  }
+}
+
 // Taken from (and modified) the shopify theme script repo
 // https://github.com/Shopify/theme-scripts/blob/bcfb471f2a57d439e2f964a1bb65b67708cc90c3/packages/theme-images/images.js#L59
 function removeProtocol(path) {
@@ -252,12 +266,11 @@ class ImageComponent extends React.Component {
   }
 
   getSrcSet() {
+    const url = this.image?.secure_url;
     
     if (!url) {
       return;
     }
-
-    const url = this.image.secure_url;
 
     // We can auto add srcset for cdn.builder.io and shopify
     // images, otherwise you can supply this prop manually
@@ -269,7 +282,7 @@ class ImageComponent extends React.Component {
   }
 
   render() {
-    const { aspectRatio, lazy } = this.props;
+    const { aspectRatio, lazy, fetchPriority, ...otherProps } = this.props;
     const children = this.props.builderBlock && this.props.builderBlock.children;
 
     let srcset = this.props.srcset;
@@ -359,6 +372,8 @@ class ImageComponent extends React.Component {
               // TODO: memoize on image on client
               srcSet={srcset}
               sizes={!amp && sizes ? sizes : undefined}
+              // Handle fetchPriority properly - convert to lowercase for DOM
+              {...(fetchPriority && { fetchpriority: fetchPriority })}
             />
           );
 
